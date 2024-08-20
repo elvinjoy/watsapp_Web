@@ -15,7 +15,7 @@ const StyledDivider = styled(Divider)`
 
 `
    
-const Conversations = () => {
+const Conversations = ({text}) => {
 
     const [users, setUsers] = useState([]);
 
@@ -24,10 +24,11 @@ const Conversations = () => {
     useEffect(() => {
         const fetchData = async () => {
             let response = await getUsers();
-            setUsers(response);
+            const filtereddata = response.filter(user => user.name.toLowerCase().includes(text));
+            setUsers(filtereddata);
         }
         fetchData();
-    }, []);
+    }, [text]);
 
     return (
         <Component>

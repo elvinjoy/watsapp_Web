@@ -1,5 +1,7 @@
-import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Typography, styled  } from "@mui/material";
+import { useContext } from "react"; 
+import { AccountContext } from "../../context/accountProvider";
+import { setConversation } from "../../../service/api";
 
 // Styled component for the container
 const Component = styled(Box)`
@@ -10,7 +12,7 @@ const Component = styled(Box)`
 `;
 
 const Image = styled('img')({
-    width: 30,
+    width: 40,
     height: 46,
     borderRadius: '50%',
     padding: '0 14px',
@@ -18,8 +20,16 @@ const Image = styled('img')({
 });
 
 const Conversation = ({ user }) => {
+
+    const { setPerson, account } = useContext(AccountContext);
+
+    const getUser = async () => {
+        setPerson(user);
+        await setConversation({senderId: account.sub, receiverId: user.sub });
+    } 
+
     return (
-        <Component>
+        <Component onClick={() => getUser()}>
             <Box>
                 <Image src={user.picture} alt="DP" />
             </Box>
