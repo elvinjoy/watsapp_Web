@@ -26,3 +26,29 @@ export const setConversation = async (data) => {
         console.log("error on setConversation API", error.message);
     }
 }
+
+export const getConversation = async (data) => {
+    try {
+        let response = await axios.post(`${url}/conversation/get`, data);
+        return response.data;
+    } catch (error) {
+        console.log("error on getConversation API", error.message);
+    }
+}
+
+export const newMessage = async (data) => {
+    try {
+        await axios.post(`${url}/message/add`, data);
+    } catch (error) {
+        console.log("error on newMessage API", error.message);
+    }
+}
+
+export const getMessages = async (id) => {
+    try {
+        let response = await axios.get(`${url}/message/get/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log("error on getMessages API", error.message);
+    }
+}

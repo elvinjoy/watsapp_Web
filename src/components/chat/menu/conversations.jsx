@@ -7,18 +7,16 @@ import { AccountContext } from "../../context/accountProvider";
 const Component = styled(Box)`
     height: 81vh;
     overflow-y: overlay;
-`
+`;
+
 const StyledDivider = styled(Divider)`
     margin: 0 0 0 58px;
     background-color: #e9edef;
     opacity: 0.6;
+`;
 
-`
-   
-const Conversations = ({text}) => {
-
+const Conversations = ({ text }) => {
     const [users, setUsers] = useState([]);
-
     const { account } = useContext(AccountContext);
 
     useEffect(() => {
@@ -26,21 +24,20 @@ const Conversations = ({text}) => {
             let response = await getUsers();
             const filtereddata = response.filter(user => user.name.toLowerCase().includes(text));
             setUsers(filtereddata);
-        }
+        };
         fetchData();
     }, [text]);
 
     return (
         <Component>
-            {
-                users.map(user => (
-                    user.sub !== account.sub &&
-                    <>
-                    <Conversation user={user}/>
-                    <StyledDivider />
-                    </>
-                ))
-            }
+            {users.map(user => (
+                user.sub !== account.sub && (
+                    <div key={user.sub}>
+                        <Conversation user={user} />
+                        <StyledDivider />
+                    </div>
+                )
+            ))}
         </Component>
     );
 };

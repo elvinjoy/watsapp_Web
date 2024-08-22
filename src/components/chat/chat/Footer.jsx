@@ -33,14 +33,18 @@ const ClipIcon = styled(AttachFile)`
     cursor: pointer;
 `;
 
-const Footer = () => {
+const Footer = ({ sendText, setValue, value }) => {
     return (
         <Container>
-            <EmojiEmotionsOutlined  style={{cursor: 'pointer'}}/>
+            <EmojiEmotionsOutlined style={{cursor: 'pointer'}}/>
             <ClipIcon />
             <Search>
                 <InputField
-                    placeholder="Type a message" />
+                    placeholder="Type a message"
+                    onChange={(e) => setValue(e.target.value)}
+                    onKeyPress={sendText}  // This will call sendText when the user presses a key
+                    value={value}  // Bind the input value to the state
+                />
             </Search>
             <Mic style={{cursor: 'pointer'}}/>
         </Container>
