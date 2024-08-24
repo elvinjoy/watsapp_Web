@@ -1,5 +1,7 @@
 import { Box, InputBase, styled } from "@mui/material";
 import { EmojiEmotionsOutlined, AttachFile, Mic } from "@mui/icons-material";
+import { useEffect } from "react";
+import { uploadFile } from "../../../service/api.js";
 
 const Container = styled(Box)`
     height: 55px;
@@ -33,20 +35,47 @@ const ClipIcon = styled(AttachFile)`
     cursor: pointer;
 `;
 
-const Footer = ({ sendText, setValue, value }) => {
+const Footer = ({ sendText, setValue, value, file, setFile }) => {
+
+    useEffect(() => {
+        const getImage = async () => {
+            if (file) {
+                const data = new FormData();
+                data.append("name", file.name);
+                data.append("file", file);
+
+                await uploadFile(data);
+            }
+        }
+        getImage();
+    }, [file])
+
+    const onFileChange = (e) => {
+        setFile(e.target.files[0]);
+        setValue(e.target.files[0].name);
+    }
+
     return (
         <Container>
-            <EmojiEmotionsOutlined style={{cursor: 'pointer'}}/>
-            <ClipIcon />
+            <EmojiEmotionsOutlined style={{ cursor: 'pointer' }} />
+            <label htmlFor="fileInput">
+                <ClipIcon />
+            </label>
+            <input
+                type="file"
+                id="fileInput"
+                style={{ display: 'none' }}
+                onChange={(e) => onFileChange(e)}
+            />
             <Search>
                 <InputField
                     placeholder="Type a message"
                     onChange={(e) => setValue(e.target.value)}
-                    onKeyPress={sendText}  // This will call sendText when the user presses a key
-                    value={value}  // Bind the input value to the state
+                    onKeyPress={sendText}
+                    value={value}
                 />
             </Search>
-            <Mic style={{cursor: 'pointer'}}/>
+            <Mic style={{ cursor: 'pointer' }} />
         </Container>
     );
 };
