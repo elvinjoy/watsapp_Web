@@ -26,6 +26,7 @@ const Messages = ({ person, conversation }) => {
     const { account } = useContext(AccountContext);
     const [newMessageFlag, setNewMessageFlag] = useState(false);
     const [file, setFile] = useState();
+    const [image, setImage] = useState('');
 
     useEffect(() => {
         const getMessageDetails = async () => {
@@ -42,25 +43,32 @@ const Messages = ({ person, conversation }) => {
                 senderId: account.sub,
                 receiverId: person.sub,
                 conversationId: conversation._id,
-                type: "text",
-                text: value,
+                type: file ? "file" : "text",
+                text: file ? image : value,
             };
-            await newMessage(message);
-            setValue('');
-            setNewMessageFlag(prev => !prev);
+    
+            if (!file || (file && image)) { // Ensure the image URL is set before sending
+                await newMessage(message);
+    
+                setValue('');
+                setFile(null);
+                setImage('');
+                setNewMessageFlag(prev => !prev);
+            } else {
+                console.log("Image URL not set yet.");
+            }
         }
     };
+       
 
     return (
         <Wrapper>
             <Component>
-                {
-                    messages && messages.map(message => (
-                        <Container>
+                {messages && messages.map(message => (
+                    <Container key={message._id}>
                         <Message message={message} />
-                        </Container>
-                    ))
-                }
+                    </Container>
+                ))}
             </Component>
             <Footer
                 sendText={sendText}
@@ -68,6 +76,7 @@ const Messages = ({ person, conversation }) => {
                 value={value}
                 file={file}
                 setFile={setFile}
+                setImage={setImage}
             />
         </Wrapper>
     );

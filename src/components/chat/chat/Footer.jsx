@@ -35,7 +35,7 @@ const ClipIcon = styled(AttachFile)`
     cursor: pointer;
 `;
 
-const Footer = ({ sendText, setValue, value, file, setFile }) => {
+const Footer = ({ sendText, setValue, value, file, setFile, setImage }) => {
 
     useEffect(() => {
         const getImage = async () => {
@@ -43,12 +43,16 @@ const Footer = ({ sendText, setValue, value, file, setFile }) => {
                 const data = new FormData();
                 data.append("name", file.name);
                 data.append("file", file);
-
-                await uploadFile(data);
+    
+                let response = await uploadFile(data);
+                console.log(response); // Ensure this logs the correct URL
+                setImage(response.data.image); // Correctly set the image URL
             }
-        }
+        };
         getImage();
-    }, [file])
+    }, [file]);
+    
+
 
     const onFileChange = (e) => {
         setFile(e.target.files[0]);
