@@ -17,20 +17,29 @@ const StyledDivider = styled(Divider)`
 
 const Conversations = ({ text }) => {
     const [users, setUsers] = useState([]);
-    const { account } = useContext(AccountContext);
+    const { account, socket, setActiveUsers } = useContext(AccountContext);
 
     useEffect(() => {
         const fetchData = async () => {
             let response = await getUsers();
-            const filtereddata = response.filter(user => user.name.toLowerCase().includes(text));
-            setUsers(filtereddata);
+            const filteredData = response.filter(user => user.name.toLowerCase().includes(text));
+            setUsers(filteredData);
         };
         fetchData();
     }, [text]);
 
+    useEffect(() => {
+        if (socket?.current) {
+            socket.current.emit("addUser", account);
+            socket.current.on("getUsers", users => {
+                setActiveUsers(users);
+            });
+        }
+    }, [account, socket, setActiveUsers]);
+
     return (
         <Component>
-            {users.map(user => (
+            {users.map(user => (    
                 user.sub !== account.sub && (
                     <div key={user.sub}>
                         <Conversation user={user} />

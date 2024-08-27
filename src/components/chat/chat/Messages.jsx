@@ -1,6 +1,6 @@
 import { Box, styled } from "@mui/material";
 import Footer from "./Footer";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { AccountContext } from "../../context/accountProvider";
 import { getMessages, newMessage } from "../../../service/api";
 import Message from "./message";
@@ -17,39 +17,62 @@ const Component = styled(Box)`
 
 const Container = styled(Box)`
     padding: 1px 80px;
-
 `;
 
 const Messages = ({ person, conversation }) => {
     const [value, setValue] = useState('');
     const [messages, setMessages] = useState([]);
-    const { account } = useContext(AccountContext);
-    const [newMessageFlag, setNewMessageFlag] = useState(false);
-    const [file, setFile] = useState();
+    const { account, socket, newMessageFlag, setNewMessageFlag } = useContext(AccountContext);
+    const [file, setFile] = useState(null);
     const [image, setImage] = useState('');
+    const [incomingMessage, setIncomingMessage] = useState(null);
+
+    const scrollRef = useRef(null);
 
     useEffect(() => {
-        const getMessageDetails = async () => {
-            let data = await getMessages(conversation._id);
-            setMessages(data);
+        socket.current.on("getMessage", (data) => {
+            setIncomingMessage(data);
+        });
+
+        return () => {
+            socket.current.off("getMessage");
+        };
+    }, [socket]);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (conversation._id) {
+                const data = await getMessages(conversation._id);
+                setMessages(data);
+            }
+        };
+        fetchMessages();
+    }, [conversation._id, newMessageFlag]);
+
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    useEffect(() => {
+        if (incomingMessage && conversation?.members?.includes(incomingMessage.senderId)) {
+            setMessages(prev => [...prev, incomingMessage]);
         }
-        conversation._id && getMessageDetails();
-    }, [person.id, conversation._id, newMessageFlag]);
+    }, [incomingMessage, conversation]);
 
     const sendText = async (e) => {
         const code = e.keyCode || e.which;
-        if (code === 13) {
-            let message = {
+        if (code === 13 && value.trim()) {
+            const message = {
                 senderId: account.sub,
                 receiverId: person.sub,
                 conversationId: conversation._id,
                 type: file ? "file" : "text",
                 text: file ? image : value,
             };
-    
-            if (!file || (file && image)) { // Ensure the image URL is set before sending
+
+            if (!file || (file && image)) {
+                socket.current.emit('sendMessage', message);
                 await newMessage(message);
-    
                 setValue('');
                 setFile(null);
                 setImage('');
@@ -59,13 +82,12 @@ const Messages = ({ person, conversation }) => {
             }
         }
     };
-       
 
     return (
         <Wrapper>
             <Component>
-                {messages && messages.map(message => (
-                    <Container key={message._id}>
+                {messages.map(message => (
+                    <Container key={message._id} ref={scrollRef}>
                         <Message message={message} />
                     </Container>
                 ))}

@@ -1,13 +1,14 @@
 import { Box, Typography, styled } from "@mui/material";
 import { Search, MoreVert } from '@mui/icons-material';
-// import { emptyProfilePicture } from "../../constants/data";
+import { useContext, useEffect } from "react";
+import { AccountContext } from "../../context/accountProvider";
 
 const Header = styled(Box)` 
     height: 44px;
     background: #ededed;    
     padding: 8px 16px;
     display: flex;
-    align-items: center;
+    align-items: center;    
 `;
 
 const Image = styled('img')({
@@ -19,7 +20,7 @@ const Image = styled('img')({
 
 const Name = styled(Typography)`
     margin-left: 12px !important;
-`;   
+`;
 
 const Status = styled(Typography)`
     margin-left: 12px !important;
@@ -36,14 +37,22 @@ const RightContainer = styled(Box)`
     }
 `;
 
-
 const ChatHeader = ({ person }) => {
+    const { activeUsers } = useContext(AccountContext);
+
+    useEffect(() => {
+        console.log('Active Users:', activeUsers);
+        console.log('Current Person:', person);
+    }, [activeUsers, person]);
+
+    const isOnline = activeUsers?.find(user => user.sub === person.sub);
+
     return (
         <Header>
             <Image src={person.picture} alt="DP" />
             <Box sx={{ flexGrow: 1 }}>
                 <Name>{person.name}</Name>
-                <Status>offline</Status>
+                <Status>{isOnline ? 'online' : 'offline'}</Status>
             </Box>
             <RightContainer>
                 <Search style={{ marginRight: '10px' }} />
